@@ -1,0 +1,347 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JX ROGERS Roblox Portfolio</title>
+    <!-- Tailwind CSS (Precompiled Minified Version from jsDelivr) -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #000000; /* Black background */
+            color: #ffffff;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .card-hover:hover {
+            transform: scale(1.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 10px 20px rgba(255, 0, 0, 0.7); /* Red neon glow */
+        }
+        .nav-link:hover {
+            color: #ff0000;
+            animation: glitch 0.3s infinite;
+        }
+        .glitch {
+            position: relative;
+            color: #ffffff;
+        }
+        .glitch:hover::before, .glitch:hover::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .glitch:hover::before {
+            color: #ff0000;
+            left: 2px;
+            animation: glitch-top 0.3s infinite linear;
+        }
+        .glitch:hover::after {
+            color: #ffffff;
+            left: -2px;
+            animation: glitch-bottom 0.3s infinite linear;
+        }
+        @keyframes glitch-top {
+            0% { clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%); }
+            25% { clip-path: polygon(0 33%, 100% 33%, 100% 66%, 0 66%); }
+            50% { clip-path: polygon(0 66%, 100% 66%, 100% 100%, 0 100%); }
+        }
+        @keyframes glitch-bottom {
+            0% { clip-path: polygon(0 66%, 100% 66%, 100% 100%, 0 100%); }
+            25% { clip-path: polygon(0 33%, 100% 33%, 100% 66%, 0 66%); }
+            50% { clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%); }
+        }
+        .animate-pulse-slow {
+            animation: pulse 3s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .page {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .page.active {
+            display: block;
+            opacity: 1;
+        }
+        .flip-card {
+            perspective: 1000px;
+        }
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+        }
+        .flip-card-back {
+            transform: rotateY(180deg);
+            background: rgba(255, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        .portfolio-image {
+            width: 100%;
+            height: 48%;
+            object-fit: contain; /* Ensures full image visibility */
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full bg-black bg-opacity-90 glassmorphism z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-red-600 font-orbitron glitch" data-text="JX ROGERS">JX ROGERS</h1>
+            <div class="space-x-6">
+                <a href="#home" class="nav-link text-white font-semibold glitch" data-text="Home">Home</a>
+                <a href="#portfolio" class="nav-link text-white font-semibold glitch" data-text="Portfolio">Portfolio</a>
+                <a href="#about" class="nav-link text-white font-semibold glitch" data-text="About">About</a>
+                <a href="#contact" class="nav-link text-white font-semibold glitch" data-text="Contact">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Home Page -->
+    <section id="home" class="page active min-h-screen flex items-center justify-center text-center relative">
+        <video autoplay muted loop class="absolute inset-0 w-full h-full object-cover opacity-20 z-0"> <!-- Reduced opacity to avoid covering text -->
+            <source src="https://via.placeholder.com/1920x1080.mp4" type="video/mp4">
+        </video>
+        <div class="relative p-8 glassmorphism rounded-xl z-10"> <!-- z-index to keep text above video -->
+            <h1 class="text-5xl md:text-7xl font-bold text-white font-orbitron animate-pulse-slow glitch" data-text="HIRE ME!">HIRE ME!</h1>
+            <p class="text-xl md:text-2xl text-red-600 mt-4">Roblox Developer Open To Commissions and Selling Assets</p>
+            <div class="mt-6 space-x-4">
+                <a href="#portfolio" class="inline-block px-8 py-4 bg-red-600 text-white font-bold rounded-full hover:bg-red-700 transition-all">Explore Portfolio</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Page -->
+    <section id="portfolio" class="page py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl font-bold text-center text-red-600 font-orbitron mb-12 glitch" data-text="My Portfolio">My Portfolio</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Game 1 -->
+                <div class="flip-card card-hover glassmorphism rounded-xl h-64">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <img src="https://tr.rbxcdn.com/180DAY-0d4c5bbb56630c1c62617880a8e92cd2/256/256/Image/Webp/noFilter" alt="Rob The Vans" class="portfolio-image rounded-t-lg">
+                            <h3 class="text-xl font-bold text-white p-4">Rob The Vans</h3>
+                        </div>
+                        <div class="flip-card-back glassmorphism rounded-xl text-center">
+                            <div>
+                                <p class="text-gray-300">GFX Credit To LeeyumThe1st, Usestarcode_epicyt / Modeling Usestarcode_epicyt, War123321d, Mayoisha_ckedskiam / Scripting Usestarcode_epicyt, Mayoisha_ckedskiam / VFX Usestarcode_epicyt</p>
+                                <a href="https://www.roblox.com/games/128325260463415/Rob-The-Vans-CANDY-VAN-Black-Sabbath-Event-Day-4" target="_blank" class="inline-block px-6 py-3 mt-4 bg-red-600 text-white rounded-full hover:bg-red-700">Play Now</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Game 3 -->
+                <div class="flip-card card-hover glassmorphism rounded-xl h-64">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <img src="https://tr.rbxcdn.com/180DAY-3496eebe83f99654fa33ac4a69fc826f/150/150/Image/Webp/noFilter" alt="Below The Bricks" class="portfolio-image rounded-t-lg">
+                            <h3 class="text-xl font-bold text-white p-4">Below The Bricks [In Dev]</h3>
+                        </div>
+                        <div class="flip-card-back glassmorphism rounded-xl text-center">
+                            <div>
+                                <p class="text-gray-300">Coming Soon!</p>
+                                <a href="https://www.roblox.com/games/126981141746917/Below-The-Bricks-Testing-In-Dev" target="_blank" class="inline-block px-6 py-3 mt-4 bg-red-600 text-white rounded-full hover:bg-red-700">Play Now</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="text-center text-gray-300 mt-8">Email me to find more work and my email is <a href="mailto:Jamesrogerscars1985c8@outlook.com" class="text-red-600 hover:text-red-700">Jamesrogerscars1985c8@outlook.com</a> also my youtube is <a href="https://www.youtube.com/@XAvalancheStudios-q4j" target="_blank" class="text-red-600 hover:text-red-700">https://www.youtube.com/@XAvalancheStudios-q4j</a> and my roblox is <a href="https://www.roblox.com/users/522785931/profile" target="_blank" class="text-red-600 hover:text-red-700">https://www.roblox.com/users/522785931/profile</a> and my twitter is <a href="https://x.com/Jx_rogers" target="_blank" class="text-red-600 hover:text-red-700">https://x.com/Jx_rogers</a></p>
+        </div>
+    </section>
+
+    <!-- About Page -->
+    <section id="about" class="page py-20 px-4">
+        <div class="max-w-5xl mx-auto text-center glassmorphism p-8 rounded-xl">
+            <img src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-F2C8A5D0B9D0647292499FE6AB5CE651-Png/150/150/AvatarHeadshot/Png/noFilter" alt="Profile" class="w-32 h-32 rounded-full mx-auto mb-6 border-4 border-red-600">
+            <h2 class="text-4xl font-bold text-red-600 font-orbitron glitch" data-text="About Me">About Me</h2>
+            <p class="mt-6 text-lg text-gray-200">I'm JX ROGERS, a Roblox scripter, gfx artist, builder/modeler, vfx artist and uix artist who has worked on a variety of projects, some not even shown here</p>
+        </div>
+    </section>
+
+    <!-- Contact Page -->
+    <section id="contact" class="page py-20 px-4">
+        <div class="max-w-5xl mx-auto text-center glassmorphism p-8 rounded-xl">
+            <h2 class="text-4xl font-bold text-red-600 font-orbitron glitch" data-text="Get in Touch">Get in Touch</h2>
+            <p class="mt-6 text-lg text-gray-200">Ready to collab, buy custom assets, or talk shop? Hit me up!</p>
+            <div class="mt-6 flex justify-center gap-6">
+                <a href="mailto:Jamesrogerscars1985c8@outlook.com" class="text-red-600 hover:text-red-700 text-3xl"><i class="fas fa-envelope"></i></a>
+                <a href="https://www.roblox.com/users/522785931/profile" target="_blank" class="text-red-600 hover:text-red-700 text-3xl"><i class="fab fa-roblox"></i></a>
+                <a href="https://x.com/Jx_rogers" target="_blank" class="text-red-600 hover:text-red-700 text-3xl"><i class="fab fa-twitter"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-6 bg-black text-center">
+        <p class="text-gray-400">&copy; 2025 JX ROGERS. All rights reserved.</p>
+        <div class="mt-4 flex justify-center gap-6">
+            <a href="https://www.roblox.com/users/522785931/profile" target="_blank" class="text-red-600 hover:text-red-700">Roblox</a>
+            <a href="https://x.com/Jx_rogers" target="_blank" class="text-red-600 hover:text-red-700">Twitter</a>
+            <a href="https://www.youtube.com/@XAvalancheStudios-q4j" target="_blank" class="text-red-600 hover:text-red-700">YouTube</a>
+        </div>
+    </footer>
+
+    <!-- JavaScript for Interactivity -->
+    <script>
+        // Page toggle functionality
+        const navLinks = document.querySelectorAll('.nav-link');
+        const pages = document.querySelectorAll('.page');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetPage = document.querySelector(this.getAttribute('href'));
+
+                // Hide all pages
+                pages.forEach(page => {
+                    page.classList.remove('active');
+                    page.style.opacity = '0';
+                });
+
+                // Show target page
+                targetPage.classList.add('active');
+                setTimeout(() => { targetPage.style.opacity = '1'; }, 10);
+
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+
+        // Search functionality (keeping it in case it's repurposed later, but it won't affect anything now)
+        const searchBar = document.getElementById('searchBar');
+        if (searchBar) {
+            searchBar.addEventListener('input', function() {
+                const query = this.value.toLowerCase();
+                const assetItems = document.querySelectorAll('.asset-item');
+                assetItems.forEach(item => {
+                    const name = item.getAttribute('data-name').toLowerCase();
+                    item.style.display = name.includes(query) ? 'block' : 'none';
+                });
+            });
+        }
+
+        // Discord Webhook setup
+        const YOUR_DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1410090676187697224/n2LJQoqQ1MDxZebiHQ1AykyKYfJadBK-0n4O7T5foMEx7kD6dPMs59uA9Yu2Ay7N7hTR';
+
+        // Function to send Discord message with retry
+        async function sendDiscordMessage(message, retries = 2) {
+            for (let attempt = 1; attempt <= retries; attempt++) {
+                try {
+                    const response = await fetch(YOUR_DISCORD_WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            content: message
+                        })
+                    });
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}`);
+                    }
+                    console.log(`Discord message sent (Attempt ${attempt}):`, message);
+                    return; // Success, exit the loop
+                } catch (error) {
+                    console.error(`Discord notification failed (Attempt ${attempt}/${retries}):`, error.message);
+                    if (attempt === retries) {
+                        console.log('Max retries reached. Check the webhook URL or network:', YOUR_DISCORD_WEBHOOK_URL);
+                    } else {
+                        await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Wait before retry
+                    }
+                }
+            }
+        }
+
+        // Track site visits
+        let visitCount = localStorage.getItem('visitCount') ? parseInt(localStorage.getItem('visitCount')) : 0;
+        visitCount++;
+        localStorage.setItem('visitCount', visitCount);
+
+        if (visitCount === 1) {
+            sendDiscordMessage('Someone visited your site!');
+        }
+
+        // Simulate email notification
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'newEmail') {
+                sendDiscordMessage('New email received!');
+            }
+        });
+    </script>
+</body>
+</html>
